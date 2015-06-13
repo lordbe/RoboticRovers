@@ -1,0 +1,238 @@
+/*****************************************/
+//Autor: R.M
+//Date:  120615
+//Proyect: Robotic Rovers
+/*****************************************/
+using System;
+					
+public class Program
+{
+	// Define the plateau.	
+    public class Plateau
+    {
+        private int upper;        
+        private int right;
+		private int lower;
+		private int left;
+
+        public int Upper
+        {
+            get {return upper;}
+            set {upper = value;} 
+        }
+        public int Right 
+        {
+            get {return right;}
+            set {right = value;}
+        }        
+		public int Lower
+        { 
+            get {return lower;} 
+            set {lower = value;} 
+        }
+		public int Left
+        { 
+            get {return left;} 
+            set {left = value;} 
+        }
+    }
+	
+	// Define the rovers position .	
+    public class Position
+    {
+        private int x;        
+        private int y;
+		private string d;		
+
+        public int X
+        {
+            get {return x;}
+            set {x = value;} 
+        }
+        public int Y 
+        {
+            get {return y;}
+            set {y = value;}
+        }        
+		public string D
+        { 
+            get {return d;} 
+            set {d = value;} 
+        }		
+    }
+    
+	// Define the series of rovers instructions.	
+    public class Instructions
+    {
+        private string series;        
+        
+        public string Series
+        {
+            get {return series;}
+            set {series = value;} 
+        }
+	}
+		
+
+	public static void Main()
+	{
+		// Create var to store the plateau.
+        var plateau = new Plateau();		
+		Console.WriteLine("Please enter the plateau coordinates (upper right):");
+		var pCoordinates = Console.ReadLine();
+		pCoordinates= string.IsNullOrEmpty(pCoordinates)? "0 0": pCoordinates + " 0 0";
+		
+		if(pCoordinates.Split(' ').Length == 4 )
+		{	
+		plateau.Upper = int.Parse(pCoordinates.Split(' ')[0]);   
+		plateau.Right = int.Parse(pCoordinates.Split(' ')[1]);   
+		plateau.Lower = int.Parse(pCoordinates.Split(' ')[2]);   
+		plateau.Left = int.Parse(pCoordinates.Split(' ')[3]);   
+		}
+		else
+		{
+			Console.WriteLine("Data error, need two numbers separated by spaces");
+			return;
+		}
+		//Rovers, positions and instructions		
+		Console.WriteLine("\nPlease enter the rovers position and instructions...\nNumber of rovers:");
+		var nRovers = int.Parse(Console.ReadLine());
+		Position[] rPosition = new Position[nRovers]; 
+		Instructions[] rInstructions = new Instructions[nRovers];
+		
+		// Populate the rovers position library with positions objects.
+        for (int j=0; j < nRovers; j++)
+        {
+			rPosition[j] = new Position();
+			rInstructions[j] = new Instructions();
+        } 
+		
+		var i = 0;
+		var aux = string.Empty;
+		while(i <= nRovers-1)
+		{
+			aux = Console.ReadLine().ToString();
+			if(aux.Split(' ').Length == 3 )
+			{			
+				rPosition[i].X = int.Parse((aux.Split(' ')[0].ToString()));
+				rPosition[i].Y = int.Parse((aux.Split(' ')[1].ToString()));
+				rPosition[i].D = aux.Split(' ')[2].ToString();
+			}
+			else
+			{
+				Console.WriteLine("\n Data error, need two numbers and a letter separated by spaces");
+				return ;
+			}
+			
+			aux = Console.ReadLine().ToString();			
+			if(aux.Split(' ').Length == 1 )
+			{
+				rInstructions[i].Series = aux;						
+			}
+			else
+			{
+				Console.WriteLine("\n Data error, need a string without spaces");
+				return ;
+			}
+			i += 1;			
+		}		
+		
+		//Step by Step		
+		for(int m = 0; m < nRovers; m++)
+		{
+			var serie = string.Empty;		
+			for(int n = 0; n < rInstructions[m].Series.Length; n++)
+			{				
+				serie = rInstructions[m].Series.Substring(n,1).ToUpper().Trim();				
+				//Make step
+				var direction = rPosition[m].D.ToUpper().Trim();				
+				if(serie == "M")
+				{
+					//var direction = rPosition[i].D;
+					switch (direction)
+					{
+						case "E": 
+							rPosition[m].X +=1; break;
+    					case "S": 
+							rPosition[m].Y -=1; break; 
+						case "O": 
+							rPosition[m].X -=1; break;
+						case "N": 
+							rPosition[m].Y +=1; break;
+    					default: break;
+					}					
+				}//OR 
+				else
+				{
+					if(serie == "R")
+					{						
+						switch (direction)
+						{
+							case "E": 
+								rPosition[m].D ="S"; break;
+    						case "S": 
+								rPosition[m].D ="O"; break; 
+							case "O": 
+								rPosition[m].D ="N"; break;
+							case "N": 
+								rPosition[m].D ="E"; break;
+    						default: break;
+						}	
+					}
+					
+					if(serie == "L")
+					{						
+						switch (direction)
+						{
+							case "E": 
+								rPosition[m].D ="N"; break;
+    						case "S": 
+								rPosition[m].D ="E"; break; 
+							case "O": 
+								rPosition[m].D ="S"; break;
+							case "N": 
+								rPosition[m].D ="O"; break;
+    						default: break;
+						}
+					}						
+				}
+				if( (rPosition[m].X > plateau.Upper) || (rPosition[m].Y > plateau.Right)  )
+				{
+					Console.WriteLine("\n Out of plateau range.");
+					//System.Environment.Exit(0);
+					return;
+				}
+			}// end for n
+		}// end for m
+		
+		
+		//OUTPUT TEST	
+		/*Console.WriteLine("\nOutput test:");
+		Console.WriteLine(pCoordinates);
+		Console.WriteLine(plateau.Upper);
+		Console.WriteLine(plateau.Right);
+		Console.WriteLine(plateau.Lower);
+		Console.WriteLine(plateau.Left);
+		Console.WriteLine(nRovers);
+		for (int k=0; k < nRovers; k++)
+        {
+			Console.WriteLine("rover= "+k.ToString()+" x= "+rPosition[k].X.ToString()+" y= "+rPosition[k].Y.ToString()+" d= "+rPosition[k].D.ToString()+" series= "+rInstructions[k].Series );			
+        }
+		*/	
+		
+		//PRINT OUTPUT
+		PrintOut(rPosition, nRovers);
+		
+	}
+	
+	public static  void PrintOut(Position[] rPosition, int nRovers)	
+	{
+		//var plateau = new Plateau();
+		//OUTPUT
+		Console.WriteLine("\nOUTPUT:");		
+		for (int k=0; k < nRovers; k++)
+        {
+			Console.WriteLine(rPosition[k].X.ToString()+" "+rPosition[k].Y.ToString()+" "+rPosition[k].D.ToString());			
+        }
+	}
+}
